@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Modular pipeline class for Ultimate SD Upscale.
+"""Modular pipeline class for tiled SDXL upscaling.
 
 Reuses ``StableDiffusionXLModularPipeline`` since all components (VAE, UNet,
 text encoders, scheduler) are the same.  The only addition is the
@@ -23,11 +23,11 @@ from ..stable_diffusion_xl.modular_pipeline import StableDiffusionXLModularPipel
 
 
 class UltimateSDUpscaleModularPipeline(StableDiffusionXLModularPipeline):
-    """A ModularPipeline for Ultimate SD Upscale (SDXL).
+    """A ModularPipeline for tiled SDXL upscaling.
 
     Inherits all SDXL component properties (``vae_scale_factor``,
     ``default_sample_size``, etc.) and overrides the default blocks to use
-    the Ultimate SD Upscale block composition.
+    the tiled upscaling block composition.
 
     > [!WARNING] > This is an experimental feature and is likely to change in the future.
     """

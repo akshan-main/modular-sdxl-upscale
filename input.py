@@ -32,7 +32,7 @@ class UltimateSDUpscaleTextEncoderStep(StableDiffusionXLTextEncoderStep):
     embeddings based on `components.guider.num_conditions`. This depends on the
     current `components.guider.guidance_scale` value.
 
-    In Ultimate SD Upscale, users may call the same pipeline repeatedly with
+    In tiled upscaling, users may call the same pipeline repeatedly with
     different `guidance_scale` values. Without syncing the guider scale before
     text encoding, a previous run can leave the guider in a stale state and
     cause missing negative embeddings on the next run.
@@ -90,7 +90,7 @@ class UltimateSDUpscaleTextEncoderStep(StableDiffusionXLTextEncoderStep):
 class UltimateSDUpscaleUpscaleStep(ModularPipelineBlocks):
     """Upscales the input image using Lanczos interpolation.
 
-    This is the first custom step in the Ultimate SD Upscale workflow.
+    This is the first custom step in the tiled upscaling workflow.
     It takes an input image and upscale factor, producing an upscaled image
     that subsequent tile steps will refine.
     """

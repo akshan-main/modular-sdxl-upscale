@@ -127,7 +127,7 @@ MultiDiffusionUpscaleBlocks (SequentialPipelineBlocks)
 utils_tiling.py              Tile planning, cosine weights, blending
 input.py                     Text encoder, upscale, tile plan steps
 denoise.py                   MultiDiffusion step, tile UNet, ControlNet
-modular_blocks_*.py          Block compositions
+modular_blocks.py            Block compositions
 modular_pipeline.py          Pipeline class
 hub_block/                   HuggingFace Hub block (consolidated single file)
 ```

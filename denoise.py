@@ -12,19 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tiled img2img loop for Ultimate SD Upscale.
+"""Tiled upscaling denoise steps for Modular SDXL Upscale.
 
-Architecture follows the ``LoopSequentialPipelineBlocks`` pattern used by the
-SDXL denoising loop.  ``UltimateSDUpscaleTileLoopStep`` is the loop wrapper
-(iterates over *tiles*); its sub-blocks are leaf blocks that handle one tile
-per call:
-
-    TilePrepareStep   – crop, VAE encode, prepare latents, tile-aware add_cond
-    TileDenoiserStep  – full denoising loop (wraps ``StableDiffusionXLDenoiseStep``)
-    TilePostProcessStep – decode latents, extract core, paste into canvas
-
-SDXL blocks are reused via their public interface by creating temporary
-``PipelineState`` objects, NOT by calling private helpers.
+Contains the tile loop (per-tile crop/denoise/paste) and the MultiDiffusion
+step (latent-space blending across overlapping tiles). Both approaches reuse
+SDXL blocks via their public interface.
 """
 
 import math
@@ -844,7 +836,7 @@ class UltimateSDUpscaleTileLoopStep(LoopSequentialPipelineBlocks):
         if block_state.use_controlnet:
             if isinstance(control_image, list):
                 raise ValueError(
-                    "Ultimate SD Upscale currently supports a single `control_image`, not a list."
+                    "MultiDiffusion currently supports a single `control_image`, not a list."
                 )
             if not hasattr(components, "controlnet") or components.controlnet is None:
                 raise ValueError(
