@@ -1,0 +1,119 @@
+{
+  "_blocks_class_name": "MultiDiffusionUpscaleBlocks",
+  "_class_name": "StableDiffusionXLModularPipeline",
+  "_diffusers_version": "0.38.0.dev0",
+  "controlnet": [
+    null,
+    null,
+    {
+      "pretrained_model_name_or_path": null,
+      "revision": null,
+      "subfolder": "",
+      "type_hint": [
+        "diffusers",
+        "ControlNetModel"
+      ],
+      "variant": null
+    }
+  ],
+  "force_zeros_for_empty_prompt": true,
+  "requires_aesthetics_score": false,
+  "scheduler": [
+    null,
+    null,
+    {
+      "pretrained_model_name_or_path": null,
+      "revision": null,
+      "subfolder": "",
+      "type_hint": [
+        "diffusers",
+        "EulerDiscreteScheduler"
+      ],
+      "variant": null
+    }
+  ],
+  "text_encoder": [
+    null,
+    null,
+    {
+      "pretrained_model_name_or_path": null,
+      "revision": null,
+      "subfolder": "",
+      "type_hint": [
+        "transformers",
+        "CLIPTextModel"
+      ],
+      "variant": null
+    }
+  ],
+  "text_encoder_2": [
+    null,
+    null,
+    {
+      "pretrained_model_name_or_path": null,
+      "revision": null,
+      "subfolder": "",
+      "type_hint": [
+        "transformers",
+        "CLIPTextModelWithProjection"
+      ],
+      "variant": null
+    }
+  ],
+  "tokenizer": [
+    null,
+    null,
+    {
+      "pretrained_model_name_or_path": null,
+      "revision": null,
+      "subfolder": "",
+      "type_hint": [
+        "transformers",
+        "CLIPTokenizer"
+      ],
+      "variant": null
+    }
+  ],
+  "tokenizer_2": [
+    null,
+    null,
+    {
+      "pretrained_model_name_or_path": null,
+      "revision": null,
+      "subfolder": "",
+      "type_hint": [
+        "transformers",
+        "CLIPTokenizer"
+      ],
+      "variant": null
+    }
+  ],
+  "unet": [
+    null,
+    null,
+    {
+      "pretrained_model_name_or_path": null,
+      "revision": null,
+      "subfolder": "",
+      "type_hint": [
+        "diffusers",
+        "UNet2DConditionModel"
+      ],
+      "variant": null
+    }
+  ],
+  "vae": [
+    null,
+    null,
+    {
+      "pretrained_model_name_or_path": null,
+      "revision": null,
+      "subfolder": "",
+      "type_hint": [
+        "diffusers",
+        "AutoencoderKL"
+      ],
+      "variant": null
+    }
+  ]
+}
