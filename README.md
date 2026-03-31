@@ -2,7 +2,7 @@
 
 Tiled image upscaling for Stable Diffusion XL using [MultiDiffusion](https://arxiv.org/abs/2302.08113) latent-space blending. Built with [Modular Diffusers](https://huggingface.co/blog/modular-diffusers).
 
-First community-contributed custom Hub block for the Modular Diffusers framework — a tiled upscaling pipeline that composes reusable SDXL blocks with MultiDiffusion and ControlNet Tile into a workflow that wasn't possible with the standard `DiffusionPipeline` API.
+First community-contributed custom Hub block for the Modular Diffusers framework - a tiled upscaling pipeline that composes reusable SDXL blocks with MultiDiffusion and ControlNet Tile into a workflow that wasn't possible with the standard `DiffusionPipeline` API.
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/gist/akshan-main/5f8b5f23b9c231524a997c5b0a7b741f/modular_sdxl_upscale_demo.ipynb)
 [![HuggingFace Hub](https://img.shields.io/badge/HuggingFace-Hub-yellow)](https://huggingface.co/akshan-main/modular-sdxl-upscale)
