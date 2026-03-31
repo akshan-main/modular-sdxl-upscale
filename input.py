@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Input steps for Modular SDXL Upscale: text encoding, Lanczos upscale."""
+
 import PIL.Image
 import torch
 
@@ -19,7 +21,6 @@ from ...utils import logging
 from ..modular_pipeline import ModularPipelineBlocks, PipelineState
 from ..modular_pipeline_utils import InputParam, OutputParam
 from ..stable_diffusion_xl.encoders import StableDiffusionXLTextEncoderStep
-from .utils_tiling import plan_seam_fix_bands, plan_tiles_chess, plan_tiles_linear, validate_tile_params
 
 
 logger = logging.get_logger(__name__)
@@ -28,43 +29,29 @@ logger = logging.get_logger(__name__)
 class UltimateSDUpscaleTextEncoderStep(StableDiffusionXLTextEncoderStep):
     """SDXL text encoder step that applies guidance scale before encoding.
 
-    StableDiffusionXLTextEncoderStep decides whether to prepare unconditional
-    embeddings based on `components.guider.num_conditions`. This depends on the
-    current `components.guider.guidance_scale` value.
+    Syncs the guider's guidance_scale before prompt encoding so that
+    unconditional embeddings are always produced when CFG is active.
 
-    In tiled upscaling, users may call the same pipeline repeatedly with
-    different `guidance_scale` values. Without syncing the guider scale before
-    text encoding, a previous run can leave the guider in a stale state and
-    cause missing negative embeddings on the next run.
-
-    Also applies a sensible default negative prompt for upscaling when the user
-    does not provide one, controlled by ``use_default_negative``.
+    Also applies a default negative prompt for upscaling when the user
+    does not provide one.
     """
 
     DEFAULT_NEGATIVE_PROMPT = "blurry, low quality, artifacts, noise, jpeg compression"
 
     @property
     def inputs(self) -> list[InputParam]:
-        # Keep all SDXL text-encoder inputs and add guidance_scale override.
         return super().inputs + [
             InputParam(
                 "guidance_scale",
                 type_hint=float,
                 default=7.5,
-                description=(
-                    "Classifier-Free Guidance scale used to configure the guider "
-                    "before prompt encoding."
-                ),
+                description="Classifier-Free Guidance scale.",
             ),
             InputParam(
                 "use_default_negative",
                 type_hint=bool,
                 default=True,
-                description=(
-                    "When True and negative_prompt is None or empty, apply a default "
-                    "negative prompt optimized for upscaling: "
-                    "'blurry, low quality, artifacts, noise, jpeg compression'."
-                ),
+                description="Apply default negative prompt when none is provided.",
             ),
         ]
 
@@ -76,7 +63,6 @@ class UltimateSDUpscaleTextEncoderStep(StableDiffusionXLTextEncoderStep):
         if hasattr(components, "guider") and components.guider is not None:
             components.guider.guidance_scale = guidance_scale
 
-        # Apply default negative prompt if user didn't provide one
         use_default_negative = getattr(block_state, "use_default_negative", True)
         if use_default_negative:
             neg = getattr(block_state, "negative_prompt", None)
@@ -88,56 +74,27 @@ class UltimateSDUpscaleTextEncoderStep(StableDiffusionXLTextEncoderStep):
 
 
 class UltimateSDUpscaleUpscaleStep(ModularPipelineBlocks):
-    """Upscales the input image using Lanczos interpolation.
-
-    This is the first custom step in the tiled upscaling workflow.
-    It takes an input image and upscale factor, producing an upscaled image
-    that subsequent tile steps will refine.
-    """
+    """Upscales the input image using Lanczos interpolation."""
 
     @property
     def description(self) -> str:
-        return (
-            "Upscale step that resizes the input image by a given factor.\n"
-            "Currently supports Lanczos interpolation. Model-based upscalers "
-            "can be added in future passes."
-        )
+        return "Upscale input image using Lanczos interpolation."
 
     @property
     def inputs(self) -> list[InputParam]:
         return [
-            InputParam(
-                "image",
-                type_hint=PIL.Image.Image,
-                required=True,
-                description="The input image to upscale and refine.",
-            ),
-            InputParam(
-                "upscale_factor",
-                type_hint=float,
-                default=2.0,
-                description="Factor by which to upscale the input image.",
-            ),
+            InputParam("image", type_hint=PIL.Image.Image, required=True,
+                       description="Input image to upscale."),
+            InputParam("upscale_factor", type_hint=float, default=2.0,
+                       description="Scale multiplier."),
         ]
 
     @property
     def intermediate_outputs(self) -> list[OutputParam]:
         return [
-            OutputParam(
-                "upscaled_image",
-                type_hint=PIL.Image.Image,
-                description="The upscaled image before tile-based refinement.",
-            ),
-            OutputParam(
-                "upscaled_width",
-                type_hint=int,
-                description="Width of the upscaled image.",
-            ),
-            OutputParam(
-                "upscaled_height",
-                type_hint=int,
-                description="Height of the upscaled image.",
-            ),
+            OutputParam("upscaled_image", type_hint=PIL.Image.Image),
+            OutputParam("upscaled_width", type_hint=int),
+            OutputParam("upscaled_height", type_hint=int),
         ]
 
     @torch.no_grad()
@@ -148,10 +105,7 @@ class UltimateSDUpscaleUpscaleStep(ModularPipelineBlocks):
         upscale_factor = block_state.upscale_factor
 
         if not isinstance(image, PIL.Image.Image):
-            raise ValueError(
-                f"Expected `image` to be a PIL.Image.Image, got {type(image)}. "
-                "Please pass a PIL image to the pipeline."
-            )
+            raise ValueError(f"Expected PIL.Image, got {type(image)}.")
 
         new_width = int(image.width * upscale_factor)
         new_height = int(image.height * upscale_factor)
@@ -160,130 +114,7 @@ class UltimateSDUpscaleUpscaleStep(ModularPipelineBlocks):
         block_state.upscaled_width = new_width
         block_state.upscaled_height = new_height
 
-        logger.info(
-            f"Upscaled image from {image.width}x{image.height} to {new_width}x{new_height} "
-            f"(factor={upscale_factor})"
-        )
-
-        self.set_block_state(state, block_state)
-        return components, state
-
-
-class UltimateSDUpscaleTilePlanStep(ModularPipelineBlocks):
-    """Plans the tile grid for the upscaled image.
-
-    Generates a list of ``TileSpec`` objects based on the requested tile size
-    and padding. Supports linear (raster) and chess (checkerboard) traversal.
-    Optionally plans seam-fix bands along tile boundaries.
-    """
-
-    @property
-    def description(self) -> str:
-        return (
-            "Tile planning step that generates tile coordinates for the upscaled image.\n"
-            "Supports 'linear' (raster) and 'chess' (checkerboard) traversal.\n"
-            "Optionally plans seam-fix bands along tile boundaries."
-        )
-
-    @property
-    def inputs(self) -> list[InputParam]:
-        return [
-            InputParam("upscaled_width", type_hint=int, required=True,
-                       description="Width of the upscaled image."),
-            InputParam("upscaled_height", type_hint=int, required=True,
-                       description="Height of the upscaled image."),
-            InputParam("tile_size", type_hint=int, default=2048,
-                       description="Base tile size in pixels. Default 2048 processes most images "
-                                   "in a single pass (seamless). Set to 512 for tiled mode on very large images."),
-            InputParam("tile_padding", type_hint=int, default=32,
-                       description="Number of overlap pixels on each side of a tile. Only relevant when tiling."),
-            InputParam("traversal_mode", type_hint=str, default="linear",
-                       description="Tile traversal order: 'linear' or 'chess'."),
-            InputParam("seam_fix_width", type_hint=int, default=0,
-                       description="Width of seam-fix bands in pixels. 0 disables seam fixing."),
-            InputParam("seam_fix_padding", type_hint=int, default=16,
-                       description="Extra padding around seam-fix bands for denoise context."),
-            InputParam("seam_fix_mask_blur", type_hint=int, default=8,
-                       description="Feathering width for seam-fix blending masks."),
-        ]
-
-    @property
-    def intermediate_outputs(self) -> list[OutputParam]:
-        return [
-            OutputParam("tile_plan", type_hint=list,
-                        description="List of TileSpec defining the tile grid."),
-            OutputParam("num_tiles", type_hint=int,
-                        description="Total number of tiles in the plan."),
-            OutputParam("seam_fix_plan", type_hint=list,
-                        description="List of SeamFixSpec for seam-fix bands (empty if disabled)."),
-            OutputParam("seam_fix_mask_blur", type_hint=int,
-                        description="Feathering width for seam-fix blending."),
-        ]
-
-    @torch.no_grad()
-    def __call__(self, components, state: PipelineState) -> PipelineState:
-        block_state = self.get_block_state(state)
-
-        tile_size = block_state.tile_size
-        tile_padding = block_state.tile_padding
-        traversal_mode = block_state.traversal_mode
-
-        if traversal_mode not in ("linear", "chess"):
-            raise ValueError(
-                f"Unsupported traversal_mode '{traversal_mode}'. "
-                "Supported modes: 'linear', 'chess'."
-            )
-
-        validate_tile_params(tile_size, tile_padding)
-
-        if traversal_mode == "chess":
-            tile_plan = plan_tiles_chess(
-                image_width=block_state.upscaled_width,
-                image_height=block_state.upscaled_height,
-                tile_size=tile_size,
-                tile_padding=tile_padding,
-            )
-        else:
-            tile_plan = plan_tiles_linear(
-                image_width=block_state.upscaled_width,
-                image_height=block_state.upscaled_height,
-                tile_size=tile_size,
-                tile_padding=tile_padding,
-            )
-
-        # Validate and plan seam-fix bands if enabled
-        seam_fix_width = block_state.seam_fix_width
-        seam_fix_padding = block_state.seam_fix_padding
-        seam_fix_mask_blur = block_state.seam_fix_mask_blur
-
-        if seam_fix_width < 0:
-            raise ValueError(f"`seam_fix_width` must be non-negative, got {seam_fix_width}.")
-        if seam_fix_padding < 0:
-            raise ValueError(f"`seam_fix_padding` must be non-negative, got {seam_fix_padding}.")
-        if seam_fix_mask_blur < 0:
-            raise ValueError(f"`seam_fix_mask_blur` must be non-negative, got {seam_fix_mask_blur}.")
-
-        if seam_fix_width > 0:
-            seam_fix_plan = plan_seam_fix_bands(
-                tiles=tile_plan,
-                image_width=block_state.upscaled_width,
-                image_height=block_state.upscaled_height,
-                seam_fix_width=seam_fix_width,
-                seam_fix_padding=seam_fix_padding,
-            )
-        else:
-            seam_fix_plan = []
-
-        block_state.tile_plan = tile_plan
-        block_state.num_tiles = len(tile_plan)
-        block_state.seam_fix_plan = seam_fix_plan
-        block_state.seam_fix_mask_blur = seam_fix_mask_blur
-
-        logger.info(
-            f"Planned {len(tile_plan)} tiles "
-            f"(tile_size={tile_size}, padding={tile_padding}, traversal={traversal_mode})"
-            + (f", {len(seam_fix_plan)} seam-fix bands" if seam_fix_plan else "")
-        )
+        logger.info(f"Upscaled {image.width}x{image.height} -> {new_width}x{new_height}")
 
         self.set_block_state(state, block_state)
         return components, state
