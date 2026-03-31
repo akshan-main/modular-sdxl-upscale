@@ -9,7 +9,7 @@ First community-contributed custom Hub block for the Modular Diffusers framework
 
 ## What it does
 
-- 2x and 4x image upscaling using SDXL as the backbone
+- Image upscaling at any scale factor using SDXL
 - MultiDiffusion: blends overlapping UNet tile predictions in latent space with cosine weights. No visible seams
 - Optional ControlNet Tile conditioning for structure-preserving upscaling
 - Progressive upscaling: automatically splits 4x+ into multiple 2x passes
