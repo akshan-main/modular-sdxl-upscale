@@ -12,7 +12,7 @@ First community-contributed custom Hub block for the Modular Diffusers framework
 - Image upscaling at any scale factor using SDXL
 - MultiDiffusion: blends overlapping UNet tile predictions in latent space with cosine weights. No visible seams
 - Optional ControlNet Tile conditioning for structure-preserving upscaling
-- Progressive upscaling: automatically splits 4x+ into multiple 2x passes
+- Progressive upscaling: automatically splits large scale factors into multiple passes
 - Auto-strength scaling per pass
 - Scheduler selection (Euler, DPM++ 2M, DPM++ 2M Karras)
 
@@ -61,7 +61,7 @@ result = pipe(
 result[0].save("upscaled.png")
 ```
 
-### 4x progressive upscale
+### Progressive upscale
 
 ```python
 result = pipe(
@@ -91,7 +91,7 @@ result = pipe(
 | `control_image` | `None` | ControlNet conditioning image |
 | `controlnet_conditioning_scale` | `1.0` | ControlNet strength |
 | `negative_prompt` | auto | Defaults to "blurry, low quality, artifacts, noise, jpeg compression" |
-| `progressive` | `True` | Split upscale_factor > 2 into multiple 2x passes |
+| `progressive` | `True` | Split large upscale factors into multiple passes |
 | `auto_strength` | `True` | Auto-scale strength per pass |
 | `scheduler_name` | `None` | "Euler", "DPM++ 2M", "DPM++ 2M Karras" |
 | `generator` | `None` | Torch generator for reproducibility |
@@ -99,7 +99,7 @@ result = pipe(
 ## Limitations
 
 - SDXL is trained on 1024x1024. `latent_tile_size` below 64 may produce artifacts
-- 4x from inputs below 256px produces distortion. Use progressive mode
+- Very small inputs produce distortion. Use progressive mode
 - ControlNet Tile is required for faithful upscaling, it is a very low-weight dependency, though, so not a big deal
 - Not suitable for text, line art, or pixel art
 
