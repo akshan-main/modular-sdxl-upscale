@@ -100,9 +100,8 @@ result = pipe(
 
 - SDXL is trained on 1024x1024. `latent_tile_size` below 64 may produce artifacts
 - 4x from inputs below 256px produces distortion. Use progressive mode
-- ControlNet Tile is required for faithful upscaling
+- ControlNet Tile is required for faithful upscaling, it is a very low-weight dependency, though, so not a big deal
 - Not suitable for text, line art, or pixel art
-- VRAM: ~10GB for 2x, ~14GB for 4x progressive (fp16)
 
 ## Architecture
 
