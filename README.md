@@ -130,7 +130,6 @@ denoise.py                   MultiDiffusion step, tile UNet, ControlNet
 modular_blocks_*.py          Block compositions
 modular_pipeline.py          Pipeline class
 hub_block/                   HuggingFace Hub block (consolidated single file)
-notebooks/demo.ipynb         Colab demo notebook
 ```
 
 ## References
@@ -139,6 +138,7 @@ notebooks/demo.ipynb         Colab demo notebook
 - [Ultimate Upscale for A1111](https://github.com/Coyote-A/ultimate-upscale-for-automatic1111)
 - [Tiled Diffusion for A1111](https://github.com/pkuliyi2015/multidiffusion-upscaler-for-automatic1111)
 - [Modular Diffusers](https://huggingface.co/blog/modular-diffusers)
+- [Modular Diffusers contribution call](https://github.com/huggingface/diffusers/issues/13295)
 - [ControlNet Tile](https://huggingface.co/xinsir/controlnet-tile-sdxl-1.0)
 
 ## License
