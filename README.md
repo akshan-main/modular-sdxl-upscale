@@ -140,6 +140,3 @@ hub_block/                   HuggingFace Hub block (consolidated single file)
 - [Modular Diffusers contribution call](https://github.com/huggingface/diffusers/issues/13295)
 - [ControlNet Tile](https://huggingface.co/xinsir/controlnet-tile-sdxl-1.0)
 
-## License
-
-Apache 2.0
