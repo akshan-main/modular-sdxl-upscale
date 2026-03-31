@@ -109,7 +109,6 @@ result = pipe(
 MultiDiffusionUpscaleBlocks (SequentialPipelineBlocks)
   text_encoder      SDXL TextEncoderStep (reused)
   upscale           Lanczos upscale step
-  tile_plan         Tile planning step
   input             SDXL InputStep (reused)
   set_timesteps     SDXL Img2Img SetTimestepsStep (reused)
   multidiffusion    MultiDiffusion step
@@ -123,9 +122,9 @@ MultiDiffusionUpscaleBlocks (SequentialPipelineBlocks)
 ## Project structure
 
 ```
-utils_tiling.py              Tile planning, cosine weights, blending
-input.py                     Text encoder, upscale, tile plan steps
-denoise.py                   MultiDiffusion step, tile UNet, ControlNet
+utils_tiling.py              Latent tile planning, cosine weights
+input.py                     Text encoder, upscale steps
+denoise.py                   MultiDiffusion step, ControlNet integration
 modular_blocks.py            Block compositions
 modular_pipeline.py          Pipeline class
 hub_block/                   HuggingFace Hub block (consolidated single file)
