@@ -124,14 +124,12 @@ MultiDiffusionUpscaleBlocks (SequentialPipelineBlocks)
 ## Project structure
 
 ```
-src/modular_sdxl_upscale/    Source code
-  utils_tiling.py            Tile planning, cosine weights, blending
-  input.py                   Text encoder, upscale, tile plan steps
-  denoise.py                 MultiDiffusion step, tile UNet, ControlNet
-  modular_blocks_*.py        Block compositions
-  modular_pipeline.py        Pipeline class
+utils_tiling.py              Tile planning, cosine weights, blending
+input.py                     Text encoder, upscale, tile plan steps
+denoise.py                   MultiDiffusion step, tile UNet, ControlNet
+modular_blocks_*.py          Block compositions
+modular_pipeline.py          Pipeline class
 hub_block/                   HuggingFace Hub block (consolidated single file)
-tests/                       96 unit tests
 notebooks/demo.ipynb         Colab demo notebook
 ```
 
@@ -140,7 +138,7 @@ notebooks/demo.ipynb         Colab demo notebook
 - [MultiDiffusion](https://arxiv.org/abs/2302.08113) (Bar-Tal et al., 2023)
 - [Ultimate Upscale for A1111](https://github.com/Coyote-A/ultimate-upscale-for-automatic1111)
 - [Tiled Diffusion for A1111](https://github.com/pkuliyi2015/multidiffusion-upscaler-for-automatic1111)
-- [Modular Diffusers](https://huggingface.co/docs/diffusers/main/en/modular_diffusers)
+- [Modular Diffusers](https://huggingface.co/docs/diffusers/en/modular_diffusers)
 - [ControlNet Tile](https://huggingface.co/xinsir/controlnet-tile-sdxl-1.0)
 
 ## License
