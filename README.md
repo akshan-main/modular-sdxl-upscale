@@ -1,6 +1,6 @@
 # Modular SDXL Upscale
 
-Tiled image upscaling for Stable Diffusion XL using [MultiDiffusion](https://arxiv.org/abs/2302.08113) latent-space blending. Built with [Modular Diffusers](https://huggingface.co/docs/diffusers/main/en/modular_diffusers).
+Tiled image upscaling for Stable Diffusion XL using [MultiDiffusion](https://arxiv.org/abs/2302.08113) latent-space blending. Built with [Modular Diffusers](https://huggingface.co/blog/modular-diffusers).
 
 First community-contributed custom Hub block for the Modular Diffusers framework — a tiled upscaling pipeline that composes reusable SDXL blocks with MultiDiffusion and ControlNet Tile into a workflow that wasn't possible with the standard `DiffusionPipeline` API.
 
@@ -138,7 +138,7 @@ notebooks/demo.ipynb         Colab demo notebook
 - [MultiDiffusion](https://arxiv.org/abs/2302.08113) (Bar-Tal et al., 2023)
 - [Ultimate Upscale for A1111](https://github.com/Coyote-A/ultimate-upscale-for-automatic1111)
 - [Tiled Diffusion for A1111](https://github.com/pkuliyi2015/multidiffusion-upscaler-for-automatic1111)
-- [Modular Diffusers](https://huggingface.co/docs/diffusers/en/modular_diffusers)
+- [Modular Diffusers](https://huggingface.co/blog/modular-diffusers)
 - [ControlNet Tile](https://huggingface.co/xinsir/controlnet-tile-sdxl-1.0)
 
 ## License
