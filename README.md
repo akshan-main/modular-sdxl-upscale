@@ -4,7 +4,7 @@ Tiled image upscaling for Stable Diffusion XL using [MultiDiffusion](https://arx
 
 First community-contributed custom Hub block for the Modular Diffusers framework - a tiled upscaling pipeline that composes reusable SDXL blocks with MultiDiffusion and ControlNet Tile into a workflow that wasn't possible with the standard `DiffusionPipeline` API.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/gist/akshan-main/5f8b5f23b9c231524a997c5b0a7b741f/modular_sdxl_upscale_demo.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/gist/akshan-main/e9bfd39568bbf7b5795053a27ee89ef6/modular_sdxl_upscale_demo.ipynb)
 [![HuggingFace Hub](https://img.shields.io/badge/HuggingFace-Hub-yellow)](https://huggingface.co/akshan-main/modular-sdxl-upscale)
 
 ## What it does
@@ -29,15 +29,13 @@ Requires diffusers from main (modular diffusers support).
 ### From HuggingFace Hub (recommended)
 
 ```python
-from diffusers import ModularPipelineBlocks, ControlNetModel
+from diffusers import ModularPipeline, ControlNetModel
 import torch
 
-blocks = ModularPipelineBlocks.from_pretrained(
+pipe = ModularPipeline.from_pretrained(
     "akshan-main/modular-sdxl-upscale",
     trust_remote_code=True,
 )
-
-pipe = blocks.init_pipeline("stabilityai/stable-diffusion-xl-base-1.0")
 pipe.load_components(torch_dtype=torch.float16)
 
 controlnet = ControlNetModel.from_pretrained(
